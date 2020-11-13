@@ -1,1 +1,1 @@
-Prediction of beer consumtion using the kaggle consumo ceveja dataset
+Prediction of beer consumption using the kaggle consumo ceveja dataset
