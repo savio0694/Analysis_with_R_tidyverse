@@ -1,12 +1,16 @@
 ---
 title: "Prediction of beer consumption in Sao Paulo Brazil"
 output:
-  html_document
-    
+  
+    html_document:
+    df_print: paged
+runtime: shiny
 ---
+<p>The data (sample) were collected in São Paulo-Brazil, in a university area, where there are some parties with groups of students from 18 to 28 years of age (average). The dataset used for this activity has 7 attributes, with consumpion being a Target, with period of one year.</p>
 
-<h5><b>Loading dependent libraries:</b></h5>
-```{r echo=TRUE, message=FALSE, warning=FALSE}
+
+<h5><b>Loading required libraries:</b></h5>
+```{r message=FALSE, warning=FALSE}
 library(dplyr)
 library(ggplot2)
 library(readr)
@@ -16,9 +20,18 @@ library(purrr)
 library(lubridate)
 library(corrplot)
 library(caretEnsemble)
+library(shiny)
+library(knitr)
+library(e1071)
+library(randomForest)
+library(elasticnet)
+library(boot)
+library(forcats)
+library(shinythemes)
 ```
 
-<h4><b>Here we import the data using the readr library.</b></h4>
+
+<h4><b>Importing the data using the readr library.</b></h4>
 <p>In our raw data commas are used as decimal points. readr reads the temperature data as integers and  ignores the commas so we import the numeric values as characters and will  convert them later on after replacing the commas with a decimal point</p>
 ```{r}
 beerdata<-read_csv('Consumo_cerveja.csv',col_types = cols(
@@ -41,9 +54,12 @@ str(beerdata)
 ```{r}
 colnames(beerdata)<- c('date','mean_temp','min_temp','max_temp','rainfall','endofweek','beerconsumption')
 ```
+
+
 ```{r}
-head(beerdata)
+beerdata
 ```
+
 
 <h5><b>Trimming the dataset to include only the first 365 rows
 as the data only pertains to one year and the remainig values are NULL.</b></h5>
@@ -92,6 +108,10 @@ ggplot(data=beerdata,aes(x=endofweek,y=beerconsumption))+geom_boxplot(aes(fill=e
 
 scale_fill_brewer(type='div',palette = 4)+theme_minimal()
   
+```
+
+```{r,secho=FALSE}
+beerdata[[6]]<-as.double(beerdata[[6]])
 ```
 
 <h5><b>Adding day of week as a new column</b></h5>
@@ -198,5 +218,73 @@ model_results <- data.frame(
 print(model_results)
 ```
 
+```{r,echo=FALSE}
+
+shinyApp(
+ui <- fluidPage(theme = shinytheme("superhero"),
+
+   
+    titlePanel("PREDICTION OF BEER CONSUMPTINON"),
+
+    
+    sidebarLayout(
+        sidebarPanel(
+            sliderInput("MIN_TEMP",
+                        "Minimum temperature:",
+                        min = 0,
+                        max = 30,
+                        value = 30),
+        
+        
+        
+          
+                sliderInput("MAX_TEMP",
+                            "Maximum temperature:",
+                            min = 0,
+                            max = 36,
+                            value = 30),
+            
+    
+    
+    
+        radioButtons("WEEKEND", h3("WEEKEND?"),
+                     choices = list(yes = 1, no = 0
+                                    )
+    )),
+
+        
+        mainPanel(
+          h2("PREDICTED VALUE :"),h1(textOutput("TEMP"))
+        ))
+    
+    
+    
+),
+
+
+server <- function(input, output) {
+    beer_dashboard<-beerdata%>%select(max_temp,endofweek,min_temp,beerconsumption)
+    trainIndex <- createDataPartition(beer_dashboard$beerconsumption, p = .8, 
+                                      list = FALSE, 
+                                      times = 1)
+    
+    Train <- beer_dashboard[ trainIndex,]
+    Test  <- beer_dashboard[-trainIndex,]
+    fitControl <- trainControl(method = "cv",   number = 5,
+                             )
+    model<-train(beerconsumption~., data = Train,method = "lasso",trControl = fitControl)
+    
+    
+    
+    
+    output$TEMP <- renderText({
+df <- data.frame(max_temp=input$MAX_TEMP,endofweek=as.double(input$WEEKEND),min_temp=input$MIN_TEMP)
+        predicted<-predict(model,df)
+        paste(round(predicted))
+        })
+}
+
+)
+```
 
 
