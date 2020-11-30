@@ -6,4 +6,4 @@ The link to the analysis is below:
 
 https://leandersavio.shinyapps.io/DOC1/
 
-![alt text](https://github.com/savio0694/SAO-PAULO-BEERCONSUMPITON-with-R/tree/main/IMAGE/R.png)
+https://github.com/savio0694/SAO-PAULO-BEERCONSUMPITON-with-R/tree/main/IMAGE/R.png
