@@ -5,3 +5,5 @@ The dataset used for this activity has 7 attributes, consumptionbeing a Target, 
 The link to the analysis is below:
 
 https://leandersavio.shinyapps.io/DOC1/
+
+![--](https://github.com/savio0694/SAO-PAULO-BEERCONSUMPITON-with-R/tree/main/IMAGE/R.png)
