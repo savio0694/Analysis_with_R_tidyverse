@@ -6,7 +6,10 @@ output:
     df_print: paged
 runtime: shiny
 ---
-<p>The data (sample) were collected in São Paulo-Brazil, in a university area, where there are some parties with groups of students from 18 to 28 years of age (average). The dataset used for this activity has 7 attributes, with consumpion being a Target, with period of one year.</p>
+<p>The data (sample) were collected in São Paulo-Brazil The dataset used for this activity has 7 attributes, with consumpion being a Target, with period of one year.</p>
+
+<p>The goal is to determine what factors contribute o beer consumption and use an appropriate ML model to predict
+the consumption of beer.</p>
 
 
 <h5><b>Loading required libraries:</b></h5>
@@ -126,7 +129,7 @@ ggplot(data=beerdata,aes(x=dayofweek,y=beerconsumption))+geom_boxplot(aes(fill=d
 
 scale_fill_brewer(palette = 'Spectral')+theme_bw()
 ```
-<h5> <b>There seems to be a positive relationship between temperature and beer consumption fo evey day of the week.</b></h5>
+<h5> <b>There seems to be a positive relationship between temperature and beer consumption fo evey day of the week. A linear model is likely to perform well if temperature is indeed an important feature.</b></h5>
 ```{r}
 ggplot(data=beerdata,aes(x=mean_temp,y=beerconsumption))+geom_point(aes(color=mean_temp))+
   geom_smooth()+facet_wrap(~dayofweek)+scale_color_gradient(low="yellow", high="red")
@@ -229,8 +232,8 @@ ui <- fluidPage(theme = shinytheme("superhero"),
     
     sidebarLayout(
         sidebarPanel(
-            sliderInput("MIN_TEMP",
-                        "Minimum temperature:",
+            sliderInput("MEAN_TEMP",
+                        "Mean temperature:",
                         min = 0,
                         max = 30,
                         value = 30),
@@ -263,7 +266,7 @@ ui <- fluidPage(theme = shinytheme("superhero"),
 
 
 server <- function(input, output) {
-    beer_dashboard<-beerdata%>%select(max_temp,endofweek,min_temp,beerconsumption)
+    beer_dashboard<-beerdata%>%select(max_temp,endofweek,mean_temp,beerconsumption)
     trainIndex <- createDataPartition(beer_dashboard$beerconsumption, p = .8, 
                                       list = FALSE, 
                                       times = 1)
@@ -278,7 +281,7 @@ server <- function(input, output) {
     
     
     output$TEMP <- renderText({
-df <- data.frame(max_temp=input$MAX_TEMP,endofweek=as.double(input$WEEKEND),min_temp=input$MIN_TEMP)
+df <- data.frame(max_temp=input$MAX_TEMP,endofweek=as.double(input$WEEKEND),mean_temp=input$MEAN_TEMP)
         predicted<-predict(model,df)
         paste(round(predicted))
         })
