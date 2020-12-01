@@ -1,0 +1,12 @@
+name: DOC1
+title: DOC1
+username:
+account: leandersavio
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 3304292
+bundleId: 3926081
+url: https://leandersavio.shinyapps.io/DOC1/
+when: 1606798413.81417
+asMultiple: FALSE
+asStatic: FALSE

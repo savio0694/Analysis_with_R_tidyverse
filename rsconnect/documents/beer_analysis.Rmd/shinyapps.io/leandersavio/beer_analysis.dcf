@@ -1,0 +1,12 @@
+name: beer_analysis
+title: beer_analysis
+username:
+account: leandersavio
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 3328786
+bundleId: 3926033
+url: https://leandersavio.shinyapps.io/beer_analysis/
+when: 1606797036.05214
+asMultiple: FALSE
+asStatic: FALSE
