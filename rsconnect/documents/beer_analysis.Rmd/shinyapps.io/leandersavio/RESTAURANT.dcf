@@ -1,0 +1,12 @@
+name: RESTAURANT
+title:
+username:
+account: leandersavio
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 3406791
+bundleId: 4891048
+url: https://leandersavio.shinyapps.io/RESTAURANT/
+when: 1628162022.4012
+asMultiple: FALSE
+asStatic: FALSE

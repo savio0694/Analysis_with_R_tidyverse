@@ -1,15 +1,13 @@
 ---
 title: "Prediction of beer consumption in Sao Paulo Brazil"
-output:
+output: html_document
   
-    html_document:
-    df_print: paged
+    
 runtime: shiny
 ---
-<p>The data (sample) were collected in São Paulo-Brazil The dataset used for this activity has 7 attributes, with consumpion being a Target, with period of one year.</p>
+<p>The data (sample) was collected in São Paulo-Brazil The dataset used for this activity has 7 attributes/features. The data is recorded for a  period of one year.</p>
 
-<p>The goal is to determine what factors contribute o beer consumption and use an appropriate ML model to predict
-the consumption of beer.</p>
+<p>The goal is to determine what factors contribute to beer consumption and use an appropriate Machine learning model to predict the consumption of beer(litres per 1000 people).</p>
 
 
 <h5><b>Loading required libraries:</b></h5>
@@ -31,11 +29,15 @@ library(elasticnet)
 library(boot)
 library(forcats)
 library(shinythemes)
+library(kableExtra)
 ```
 
 
+
+
+
 <h4><b>Importing the data using the readr library.</b></h4>
-<p>In our raw data commas are used as decimal points. readr reads the temperature data as integers and  ignores the commas so we import the numeric values as characters and will  convert them later on after replacing the commas with a decimal point</p>
+<p>In the raw data commas are used as decimal points. readr reads the temperature data as integers and  ignores the commas(23,2 degrees becomes 232 degrees) so we import the numeric values as characters and will  convert them later on , replacing the commas with a decimal point</p>
 ```{r}
 beerdata<-read_csv('Consumo_cerveja.csv',col_types = cols(
   
@@ -53,14 +55,14 @@ beerdata<-read_csv('Consumo_cerveja.csv',col_types = cols(
 ```{r}
 str(beerdata)
 ```
-<h5><b>Converting the column names  from Spanish to English</b> </h5>
+<h5><b>Converting the column names  from Portuguese to English</b> </h5>
 ```{r}
 colnames(beerdata)<- c('date','mean_temp','min_temp','max_temp','rainfall','endofweek','beerconsumption')
 ```
 
 
 ```{r}
-beerdata
+head(beerdata)
 ```
 
 
@@ -94,19 +96,20 @@ for(i in 2:5){
   beerdata[[i]]<-as.double(beerdata[[i]])
 }
 ```
-```{r}
-head(beerdata)
-```
+
 
 <h5><b>Checking for NULL values</b></h5>
 
 ```{r}
 sum(is.na(beerdata))
 ```
-
-
-<h5> <b>It seems there is higher beer consumtion on weekends</b></h5>
+<h5><b> FINAL DATA:</b></h5>
 ```{r}
+head(beerdata)%>%kbl()%>%kable_material_dark(c('striped','hover'))
+```
+
+<h5> <b>There is higher consumption of beer on weekends</b></h5>
+```{r echo=TRUE}
 ggplot(data=beerdata,aes(x=endofweek,y=beerconsumption))+geom_boxplot(aes(fill=endofweek))+
 
 scale_fill_brewer(type='div',palette = 4)+theme_minimal()
@@ -138,7 +141,7 @@ ggplot(data=beerdata,aes(x=mean_temp,y=beerconsumption))+geom_point(aes(color=me
 
 ```
 <h5> <b>Since most days of the year in So Paulo have little o no rainfall,it is hard to infer any relationship between rainfall and beer consumption </b></h5> 
-```{r}
+```{r eval=FALSE, include=FALSE}
 ggplot(data=beerdata,aes(x=rainfall,y=beerconsumption))+geom_point(aes(color=rainfall))+
 scale_color_gradient(low="#00a3cc", high="#002d39")
 ```
@@ -148,7 +151,7 @@ scale_color_gradient(low="#00a3cc", high="#002d39")
 beerdata%>%mutate(monthofyear=month(date,label = TRUE))%>%group_by(monthofyear)%>%summarise(avg_beer_consumption=mean(beerconsumption))%>%ggplot(aes(x=monthofyear,y=avg_beer_consumption,fill=avg_beer_consumption))+geom_bar(stat = 'identity')
 ```
 
-<h5><b> None of the features are too correlated with beer consumtion</b></h5>
+<h5><b> None of the features are too correlated with beer consumtion.</b></h5>
 ```{r}
 correlation<-cor(beerdata%>%select(-c(date,endofweek,dayofweek)))
 corrplot(correlation, method="number")
@@ -157,7 +160,7 @@ corrplot(correlation, method="number")
 
 
 <h4><b>Finding important features using a random forest model</b></h4>
-```{r}
+```{r echo=TRUE}
 control <- trainControl(method="repeatedcv", number=5, repeats=3)
 
 model <- train(beerconsumption~., data=beerdata%>%select(-c(date,dayofweek)), method="rf", preProcess="scale", trControl=control)
@@ -168,7 +171,7 @@ print(importance)
 plot(importance)
 ```
 
-<h5><b>Choosing the temperature variables and end-of-week as the final features and split the data into test and train datasets</b></h5>
+<h5><b>Since the goal is prediction and not inference we include more than one temperature feature even though they are correlated. Choosing the temperature variables and end-of-week as the final features and split the data into test and train datasets</b></h5>
 ```{r}
 beerdata<-beerdata%>%select(max_temp,endofweek,min_temp,mean_temp,beerconsumption)
 
@@ -190,24 +193,18 @@ head(Test)
 <li>Random Forest</li>
 <li>K neares neighbours</li>
 </ul>
-```{r}
+```{r include=FALSE}
 fitControl <- trainControl(method = "cv",   number = 5,
                            savePredictions = 'final',allowParallel = TRUE)
 
-models<-caretList(beerconsumption ~., data = Train,methodList =  c("lm","rf","lasso","ridge","knn"),
+models<-caretList(beerconsumption ~., data = Train,methodList =  c("lm","lasso","ridge","knn"),
              preProcess=c('center','scale'),
              trControl = fitControl)
 
 
 ```
 
-```{r}
-models$knn
-```
 
-```{r}
-models$ridge
-```
 
 <h5> <b>Linear regression and Ridge models provided the lowest root mean squared error overall</b></h5>
 ```{r}
@@ -221,14 +218,19 @@ model_results <- data.frame(
 print(model_results)
 ```
 
-```{r,echo=FALSE}
+
+<h5> <b>The code for the below dashboard has been hidden for the sake of brevity,please refer the markdown document on my gihub for all the code.</b></h5>
+
+<h5> <b>Please reload the webpage if the dashboard doesnt load.</b></h5>
+```{r echo=FALSE}
 
 shinyApp(
 ui <- fluidPage(theme = shinytheme("superhero"),
 
    
     titlePanel("PREDICTION OF BEER CONSUMPTINON"),
-
+    
+    
     
     sidebarLayout(
         sidebarPanel(
@@ -259,7 +261,7 @@ ui <- fluidPage(theme = shinytheme("superhero"),
         mainPanel(
           h2("PREDICTED VALUE :"),h1(textOutput("TEMP"))
         ))
-    
+   
     
     
 ),
