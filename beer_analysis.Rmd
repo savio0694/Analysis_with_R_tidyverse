@@ -127,7 +127,9 @@ beerdata<-beerdata%>%mutate(dayofweek=wday(beerdata$date,label = TRUE))
 
 <h5><b>There is a marked increase in beer consumtion on SATUDRAY
 and SUNDAY</b></h5> 
-```{r}
+
+<img src="https://github.com/savio0694/SAO-PAULO-BEERCONSUMPITON-with-R/blob/main/IMAGE/1.JPG?raw=true">
+```{r eval=FALSE, include=FALSE}
 ggplot(data=beerdata,aes(x=dayofweek,y=beerconsumption))+geom_boxplot(aes(fill=dayofweek))+
 
 scale_fill_brewer(palette = 'Spectral')+theme_bw()
